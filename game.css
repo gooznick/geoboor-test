@@ -53,7 +53,7 @@ body {
   gap: 15px;
 }
 
-#btn-help {
+.icon-btn {
   text-decoration: none;
   font-size: 1.1rem;
   background: rgba(255, 255, 255, 0.08);
@@ -69,10 +69,15 @@ body {
   cursor: pointer;
 }
 
-#btn-help:hover {
+.icon-btn:hover {
   background: rgba(255, 255, 255, 0.2);
   transform: scale(1.1);
   box-shadow: 0 0 12px rgba(255, 255, 255, 0.2);
+}
+
+.icon-btn.muted {
+  opacity: 0.5;
+  background: rgba(255, 0, 0, 0.1);
 }
 
 #title {

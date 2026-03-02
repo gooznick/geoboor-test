@@ -128,6 +128,8 @@ let state = {
     easterEggsFound: new Set()
 };
 
+const audioManager = new AudioManager();
+
 // ── DOM refs ──────────────────────────────────────────────────────
 
 const mapImg = document.getElementById('map-img');
@@ -192,6 +194,7 @@ function addScore(bonus) {
     state.score += total;
     scoreEl.textContent = state.score;
     showBonus(total);
+    audioManager.playPoints();
 }
 
 function showBonus(pts) {
@@ -251,6 +254,7 @@ function hideInfoPanel() {
 // ── Easter Egg ────────────────────────────────────────────────────
 
 function triggerEasterEgg(msg, points) {
+    audioManager.playEasterEgg();
     const floater = document.createElement('div');
     floater.className = 'easter-egg-heart pumping';
     floater.textContent = msg;
@@ -304,6 +308,7 @@ function getCompliment(score) {
 }
 
 function showGameOverModal(gatheredSet) {
+    audioManager.playGameOver();
     gameOverScore.textContent = state.score + " נקודות";
     gameOverCompliment.textContent = getCompliment(state.score);
 
@@ -467,6 +472,7 @@ function showClue() {
     state.score -= COST_CLUE;
     scoreEl.textContent = state.score;
     showBonus(-COST_CLUE);
+    audioManager.playClue();
 
     const btnClue = document.getElementById('btn-clue');
     if (clueTimer) clearInterval(clueTimer);
@@ -538,6 +544,8 @@ function handleLetter(ch) {
     ch = removeSofit(ch);
     if (!isHebrewLetter(ch)) return;
 
+    audioManager.playUserSelect();
+
     if (state.wrongLetter) {
         state.wrongLetter = null;
         state.current = '';
@@ -602,6 +610,8 @@ function handleLetter(ch) {
     // Always normalize the computer's letter — no sofiot in the string!
     const compLetter = removeSofit(picked.letter);
     const canonKey = keyVariantMap[picked.key];
+
+    audioManager.playComputerSelect();
 
     state.current = compLetter + userCurrent;
 

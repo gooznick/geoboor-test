@@ -15,7 +15,8 @@
     <header id="header">
       <div class="header-right">
         <div id="title">🗺️ גאובור</div>
-        <a href="help.html" id="btn-help" title="הוראות משחק">❓</a>
+        <button id="btn-audio" onclick="audioManager.toggleMute()" title="השתק מוזיקה" class="icon-btn">🔊</button>
+        <a href="help.html" id="btn-help" title="הוראות משחק" class="icon-btn">❓</a>
       </div>
 
       <div id="score-box">
@@ -104,6 +105,7 @@
     </div>
   </div>
 
+  <script src="audio.js"></script>
   <script src="game.js"></script>
 </body>
 
