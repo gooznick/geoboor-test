@@ -567,9 +567,18 @@ function handleLetter(ch) {
 
     // Easter Egg Check (user turn)
     for (const [key, egg] of Object.entries(easterEggData)) {
-        if (!state.easterEggsFound.has(key) && userCurrent.startsWith(key)) {
-            state.easterEggsFound.add(key);
-            triggerEasterEgg(egg.msg, egg.points);
+        if (!state.easterEggsFound.has(key)) {
+            // Find the canonical key for this easter egg
+            const canonKey = keyVariantMap[key];
+            if (canonKey) {
+                // Find all variants for this canonical key
+                const variants = Object.keys(keyVariantMap).filter(k => keyVariantMap[k] === canonKey);
+                // Check if userCurrent starts with any of these variants
+                if (variants.some(v => userCurrent.startsWith(v))) {
+                    state.easterEggsFound.add(key);
+                    triggerEasterEgg(egg.msg, egg.points);
+                }
+            }
         }
     }
 
@@ -621,9 +630,15 @@ function handleLetter(ch) {
 
     // Easter Egg Check (computer turn)
     for (const [key, egg] of Object.entries(easterEggData)) {
-        if (!state.easterEggsFound.has(key) && state.current.startsWith(key)) {
-            state.easterEggsFound.add(key);
-            triggerEasterEgg(egg.msg, egg.points);
+        if (!state.easterEggsFound.has(key)) {
+            const canonKey = keyVariantMap[key];
+            if (canonKey) {
+                const variants = Object.keys(keyVariantMap).filter(k => keyVariantMap[k] === canonKey);
+                if (variants.some(v => state.current.startsWith(v))) {
+                    state.easterEggsFound.add(key);
+                    triggerEasterEgg(egg.msg, egg.points);
+                }
+            }
         }
     }
 }
