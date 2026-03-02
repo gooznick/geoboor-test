@@ -498,18 +498,34 @@ function showClue() {
 // ── Display ───────────────────────────────────────────────────────
 
 function updateDisplay() {
-    // current is built RTL; display reversed so it reads LTR in Hebrew
     const display = state.current.split('').reverse().join('');
-    const sliceLen = state.wrongLetter ? 49 : 50;
-    const dispSlice = display.length > sliceLen ? display.slice(-sliceLen) : display;
+    const wrong = state.wrongLetter ? `<span class="wrong-letter">${state.wrongLetter}</span>` : '';
 
-    let html = dispSlice;
-    if (state.wrongLetter) {
-        // Append the wrong letter dynamically without modifying the main string loop
-        html += `<span class="wrong-letter">${state.wrongLetter}</span>`;
+    currentStr.innerHTML = display + wrong;
+
+    // Dynamically enforce a maximum of 3 lines displayed
+    const computed = window.getComputedStyle(currentStr);
+    const lh = parseFloat(computed.lineHeight) || 45; // 1.4 * 32px roughly 45px
+    const maxH = lh * 3.5; // safe threshold between 3 and 4 lines
+
+    if (currentStr.scrollHeight > maxH) {
+        let left = 0;
+        let right = display.length;
+        let bestSlice = display;
+
+        // Binary search for the smallest truncation that fits in 3 lines
+        while (left <= right) {
+            const mid = Math.floor((left + right) / 2);
+            currentStr.innerHTML = display.slice(mid) + wrong;
+            if (currentStr.scrollHeight > maxH) {
+                left = mid + 1; // Need to trim more
+            } else {
+                bestSlice = display.slice(mid);
+                right = mid - 1; // Try to retain more characters
+            }
+        }
+        currentStr.innerHTML = bestSlice + wrong;
     }
-
-    currentStr.innerHTML = html;
 }
 
 // ── Game logic ────────────────────────────────────────────────────
