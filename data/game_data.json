@@ -2214,7 +2214,9 @@
         "name": "גבעון החדשה",
         "population": "1171",
         "establishment": "1980",
-        "aliases": [],
+        "aliases": [
+            "גבעון"
+        ],
         "itm_east": 215084,
         "itm_north": 639466,
         "x": 127,
@@ -8732,7 +8734,9 @@
         "name": "פקיעין חדשה",
         "population": "749",
         "establishment": "1955",
-        "aliases": [],
+        "aliases": [
+            "פקיעין"
+        ],
         "itm_east": 230497,
         "itm_north": 765441,
         "x": 149,
