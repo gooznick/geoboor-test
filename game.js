@@ -115,7 +115,7 @@ let settlementsData = {};       // canonKey → { name, aliases, x, y, ... }
 let keyVariantMap = {};         // variantKey → canonical key
 let variantDisplayName = {};    // variantKey → display name (name/alias that generated it)
 let allVariantKeys = new Set(); // all valid variant reversed-name strings
-let easterEggKeys = new Set();  // keys for easter egg settlements
+let easterEggData = {};         // Reversed validation string → {msg, points}
 let state = {
     current: '',
     wrongLetter: null,
@@ -250,16 +250,10 @@ function hideInfoPanel() {
 
 // ── Easter Egg ────────────────────────────────────────────────────
 
-function triggerEasterEgg() {
+function triggerEasterEgg(msg, points) {
     const floater = document.createElement('div');
     floater.className = 'easter-egg-heart pumping';
-
-    // Use an explicit inline SVG for guaranteed cross-OS visibility
-    floater.innerHTML = `
-        <svg viewBox="0 0 32 29.6" width="120" height="120">
-            <path fill="#ff3366" d="M23.6,0c-3.4,0-6.3,2.7-7.6,5.6C14.7,2.7,11.8,0,8.4,0C3.8,0,0,3.8,0,8.4c0,9.4,9.5,11.9,16,21.2c6.1-9.3,16-12.1,16-21.2C32,3.8,28.2,0,23.6,0z"/>
-        </svg>
-    `;
+    floater.textContent = msg;
 
     const startX = window.innerWidth / 2;
     const startY = window.innerHeight / 2;
@@ -269,7 +263,7 @@ function triggerEasterEgg() {
     document.body.appendChild(floater);
 
     setTimeout(() => {
-        floater.textContent = '+50';
+        floater.textContent = '+' + points;
         floater.classList.remove('pumping');
         floater.classList.add('moving-to-score');
 
@@ -284,12 +278,11 @@ function triggerEasterEgg() {
         floater.style.opacity = '0';
 
         setTimeout(() => {
-            state.score += 50;
+            state.score += points;
             scoreEl.textContent = state.score;
             scoreEl.style.transition = 'all 0.3s ease';
             scoreEl.style.color = '#4ecdc4';
             scoreEl.style.transform = 'scale(1.5)';
-            showBonus(50); // also trigger +50 float effect to emphasize
             setTimeout(() => {
                 scoreEl.style.color = '';
                 scoreEl.style.transform = '';
@@ -549,10 +542,10 @@ function handleLetter(ch) {
     const userCurrent = ch + state.current;
 
     // Easter Egg Check (user turn)
-    for (const key of easterEggKeys) {
+    for (const [key, egg] of Object.entries(easterEggData)) {
         if (!state.easterEggsFound.has(key) && userCurrent.startsWith(key)) {
             state.easterEggsFound.add(key);
-            triggerEasterEgg();
+            triggerEasterEgg(egg.msg, egg.points);
         }
     }
 
@@ -601,10 +594,10 @@ function handleLetter(ch) {
     addScore(bonus);
 
     // Easter Egg Check (computer turn)
-    for (const key of easterEggKeys) {
+    for (const [key, egg] of Object.entries(easterEggData)) {
         if (!state.easterEggsFound.has(key) && state.current.startsWith(key)) {
             state.easterEggsFound.add(key);
-            triggerEasterEgg();
+            triggerEasterEgg(egg.msg, egg.points);
         }
     }
 }
@@ -665,8 +658,12 @@ document.addEventListener('keydown', (e) => {
 // ── Init ──────────────────────────────────────────────────────────
 
 async function init() {
-    const resp = await fetch('data/game_data.json');
-    const raw = await resp.json();
+    const [gameResp, eggsResp] = await Promise.all([
+        fetch('data/game_data.json'),
+        fetch('data/easter_eggs.json').catch(() => null) // Ignore missing file just in case
+    ]);
+    const raw = await gameResp.json();
+    const eggsRaw = eggsResp ? await eggsResp.json() : {};
 
     settlementsData = raw;
 
@@ -688,8 +685,9 @@ async function init() {
     }
 
     // Initialize easter eggs
-    for (const name of ['פסגות', 'כרמיאל', 'שדה יעקב']) {
-        easterEggKeys.add(stripAndReverse(name));
+    for (const [name, data] of Object.entries(eggsRaw)) {
+        const key = stripAndReverse(name);
+        easterEggData[key] = data; // store object with msg and points
     }
 
     // Init Hint buttons with constants
