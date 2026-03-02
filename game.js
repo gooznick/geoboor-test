@@ -2,7 +2,7 @@
 
 // ── Game Configuration ──────────────────────────────────────────────
 const COST_REVEAL = 100; // Cost to reveal history
-const COST_CLUE = 50;    // Cost to reveal next settlement name
+const COST_CLUE = 300;    // Cost to reveal next settlement name
 const POINTS_BASE = 5;      // Base points per correct letter
 const BONUS_FAST_TIME = 5;  // Seconds threshold for max bonus
 const BONUS_FAST_PTS = 15;  // Max bonus points
