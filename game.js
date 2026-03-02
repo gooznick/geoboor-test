@@ -125,6 +125,7 @@ let state = {
     score: 0,
     lastKeyTime: null,
     chosenCircleKey: null,
+    displayOffset: 0,
     easterEggsFound: new Set()
 };
 
@@ -507,7 +508,9 @@ function updateDisplay() {
     const display = state.current.split('').reverse().join('');
     const wrong = state.wrongLetter ? `<span class="wrong-letter">${state.wrongLetter}</span>` : '';
 
-    currentStr.innerHTML = display + wrong;
+    if (state.displayOffset === undefined) state.displayOffset = 0;
+
+    currentStr.innerHTML = display.slice(state.displayOffset) + wrong;
 
     // Dynamically enforce a maximum of 3 lines displayed
     const computed = window.getComputedStyle(currentStr);
@@ -515,22 +518,26 @@ function updateDisplay() {
     const maxH = lh * 3.5; // safe threshold between 3 and 4 lines
 
     if (currentStr.scrollHeight > maxH) {
-        let left = 0;
+        let left = state.displayOffset;
         let right = display.length;
-        let bestSlice = display;
+        let bestK = right;
+        const targetH = lh * 2.5; // 2 lines threshold
 
-        // Binary search for the smallest truncation that fits in 3 lines
+        // Binary search for the smallest truncation that fits in 2 lines
         while (left <= right) {
             const mid = Math.floor((left + right) / 2);
             currentStr.innerHTML = display.slice(mid) + wrong;
-            if (currentStr.scrollHeight > maxH) {
-                left = mid + 1; // Need to trim more
+            if (currentStr.scrollHeight <= targetH) {
+                bestK = mid;
+                right = mid - 1; // Try to retain more characters (smaller k)
             } else {
-                bestSlice = display.slice(mid);
-                right = mid - 1; // Try to retain more characters
+                left = mid + 1; // Need to trim more characters
             }
         }
-        currentStr.innerHTML = bestSlice + wrong;
+
+        // We set displayOffset to bestK - 1 to make it 2 full lines + newest characters on 3rd line
+        state.displayOffset = Math.max(0, bestK - 1);
+        currentStr.innerHTML = display.slice(state.displayOffset) + wrong;
     }
 }
 
@@ -549,6 +556,7 @@ function handleLetter(ch) {
     if (state.wrongLetter) {
         state.wrongLetter = null;
         state.current = '';
+        state.displayOffset = 0;
         updateDisplay();
         hideInfoPanel();
         hideCircle();
@@ -647,6 +655,7 @@ function softReset() {
     state.current = '';
     state.wrongLetter = null;
     state.lastKeyTime = null;
+    state.displayOffset = 0;
     state.easterEggsFound.clear();
     clearForbid();
     updateDisplay();
@@ -659,6 +668,7 @@ function fullReset() {
     state.wrongLetter = null;
     state.score = 0;
     state.lastKeyTime = null;
+    state.displayOffset = 0;
     state.easterEggsFound.clear();
     clearForbid();
     scoreEl.textContent = '0';
