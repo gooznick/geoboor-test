@@ -152,7 +152,7 @@ const PNG_W = 234, PNG_H = 614;
 
 function initSvg() {
     svgOverlay.setAttribute('viewBox', `0 0 ${PNG_W} ${PNG_H}`);
-    svgOverlay.setAttribute('preserveAspectRatio', 'none');
+    svgOverlay.setAttribute('preserveAspectRatio', 'xMidYMid meet');
 }
 
 function drawCircle(canonicalKey) {
@@ -623,7 +623,34 @@ async function init() {
     if (btnClue) btnClue.textContent = `🎯 רמז (${COST_CLUE} נק')`;
 
     initSvg();
+    initKeyboard();
     updateDisplay();
+}
+
+function initKeyboard() {
+    const kbRows = [
+        ['ק', 'ר', 'א', 'ט', 'ו', 'ן', 'ם', 'פ'],
+        ['ש', 'ד', 'ג', 'כ', 'ע', 'י', 'ח', 'ל', 'ך', 'ף'],
+        ['ז', 'ס', 'ב', 'ה', 'נ', 'מ', 'צ', 'ת', 'ץ']
+    ];
+
+    const vk = document.getElementById('virtual-keyboard');
+    if (!vk) return;
+
+    for (const row of kbRows) {
+        const rowEl = document.createElement('div');
+        rowEl.className = 'kb-row';
+        for (const letter of row) {
+            const keyEl = document.createElement('button');
+            keyEl.className = 'kb-key';
+            keyEl.textContent = letter;
+            // Prevent button from capturing focus so we don't interfere with physical keyboard events
+            keyEl.onmousedown = (e) => e.preventDefault();
+            keyEl.onclick = () => handleLetter(letter);
+            rowEl.appendChild(keyEl);
+        }
+        vk.appendChild(rowEl);
+    }
 }
 
 window.addEventListener('load', init);
