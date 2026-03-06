@@ -1,4 +1,4 @@
-// מַפָּאוֹת - Settlement Guessing Game
+// GeoBoor - Settlement Guessing Game
 
 // ── Game Configuration ──────────────────────────────────────────────
 const COST_REVEAL = 100; // Cost to reveal history
@@ -147,13 +147,33 @@ function showBonus(pts) {
 
 // ── Info panel ────────────────────────────────────────────────────
 
-function showInfoPanel(canonicalKey, extraMsg) {
+function showInfoPanel(canonicalKey, extraMsg = '', missedAlias = '') {
     const entry = settlementsData[canonicalKey];
     if (!entry) return;
-    infoName.textContent = entry.name;
-    infoDetails.textContent = `הוקם: ${entry.establishment} | תושבים: ${entry.population}`;
+
+    const titleEl = document.getElementById('info-panel-title');
+    if (titleEl) {
+        titleEl.textContent = state.score >= 500 ? "אתה (לא) בור!" : "אתה בור!";
+    }
+
+    if (missedAlias && missedAlias !== entry.name) {
+        infoName.textContent = `${entry.name} (${missedAlias})`;
+    } else {
+        infoName.textContent = entry.name;
+    }
+
+    infoDetails.innerHTML = `הוקם: ${entry.establishment} | תושבים: ${entry.population}`;
+
+    // Show aliases
+    if (entry.aliases && entry.aliases.length > 0) {
+        const otherAliases = entry.aliases.filter(a => a !== missedAlias);
+        if (otherAliases.length > 0) {
+            infoDetails.innerHTML += `<br><span style="font-size: 0.9em; opacity: 0.8">שמות נוספים: ${otherAliases.join(', ')}</span>`;
+        }
+    }
+
     if (extraMsg) {
-        infoDetails.textContent += '\n' + extraMsg;
+        infoDetails.innerHTML += `<br>${extraMsg}`;
     }
     infoPanel.classList.add('visible');
 }
@@ -517,10 +537,18 @@ function handleLetter(ch) {
 
         let gatheredSet = new Set();
         if (prevOptions.length) {
-            const picked = randChoice(prevOptions);
+            let candidates = prevOptions.filter(opt => {
+                const remainder = opt.key.slice(0, opt.key.length - state.current.length);
+                return remainder.includes(ch);
+            });
+            if (candidates.length === 0) candidates = prevOptions;
+
+            const picked = randChoice(candidates);
             const canonKey = keyVariantMap[picked.key];
+            const missedAlias = variantDisplayName[picked.key];
+
             showMistakeCircle(canonKey);
-            showInfoPanel(canonKey);
+            showInfoPanel(canonKey, '', missedAlias);
 
             // Set forbid to guaranteed-consumed settlements (REPLACE, not accumulate)
             const guaranteed = findAllFormer(prevOptions);
@@ -616,37 +644,64 @@ function showInactivityTeaser() {
     const uniqueLetters = new Set(options.map(opt => opt.letter)).size;
     const uniqueSettlements = new Set(options.map(opt => keyVariantMap[opt.key])).size;
 
-    // Don't show the teaser if it's the start of the game or just after completing a settlement
-    if (uniqueLetters >= 22) return;
+    // Don't show the teaser if it's the start of the game or if there are too many options
+    if (uniqueSettlements > 40) return;
 
     let phrases = [];
+    const useLetters = Math.random() > 0.5;
 
-    // Format numbers according to Hebrew grammar
-    const lettersText = uniqueLetters === 1 ? 'אות אחת' : `${uniqueLetters} אותיות`;
-    const settlementsText = uniqueSettlements === 1 ? 'יישוב אחד' : `${uniqueSettlements} יישובים`;
-
-    if (uniqueLetters === 1 || uniqueSettlements === 1) {
-        phrases = [
-            `נשארתי רק עם ${lettersText} ו-${settlementsText}! זה מתחמם. 🥵`,
-            `יש מולי בדיוק ${lettersText} עבור ${settlementsText} שעובדים... קרב צמוד! 🎯`,
-            `מצאתי בדיוק ${lettersText} עבור ${settlementsText}. הולך להיות פה מעניין! 🧐`,
-            `זהו זה, ${settlementsText} ו-${lettersText} בלבד יצילו אתכם. ⏳`,
-            `נותר רק ${settlementsText} עם ${lettersText}. חושבים שתמצאו אותו? 🤔`,
-            `הצטמצמנו ל-${lettersText} ול-${settlementsText} בלבד... אל תפספסו! 🤫`
-        ];
+    if (useLetters) {
+        if (uniqueLetters === 1) {
+            phrases = [
+                `יש רק אות אחת שממשיכה מפה. יודעים איזו? 🎯`,
+                `הגענו למבוי (כמעט) סתום. רק אות אחת עובדת! 🤫`,
+                `אין לכם הרבה ברירות, רק אות אחת תתאים כאן. 🥸`,
+                `המוח שלי מצא רק אות אחת חוקית... ואצלכם? 🤔`,
+                `אות אחת בודדה וזהו. תמצאו אותה? ⏳`
+            ];
+        } else if (uniqueLetters <= 5) {
+            phrases = [
+                `רק ${uniqueLetters} אותיות אפשריות. אתם בכיוון הנכון! 🧐`,
+                `נשארו ${uniqueLetters} אפשרויות לאות הבאה... קלי קלות. 💪`,
+                `זה נהיה צפוף... נותרו ${uniqueLetters} אופציות. 🥵`,
+                `יש רק ${uniqueLetters} אותיות שממשיכות את הרצף. קדימה! 🔥`,
+                `כל צעד סוגר אפשרויות. ${uniqueLetters} אותיות לפניכם. �`
+            ];
+        } else {
+            phrases = [
+                `ראיתי איזה ${uniqueLetters} אותיות מתאימות... נו? 😏`,
+                `יש לי רעיון ל-${uniqueLetters} אותיות. מה איתך? 😜`,
+                `אין תירוצים, יש לפחות ${uniqueLetters} אותיות פנויות על הלוח! 😎`,
+                `קחו את הזמן... רק ${uniqueLetters} אותיות שונות יעבדו עכשיו. 🙃`,
+                `מספיק זמן לבהות! יש ${uniqueLetters} אותיות נכונות, תבחרו אחת. 😌`
+            ];
+        }
     } else {
-        phrases = [
-            `יש לי רעיונות ל־${uniqueLetters} אותיות ול־${uniqueSettlements} יישובים! נראה לי שמיצינו. 😏`,
-            `יש לי רעיונות ל־${uniqueLetters} אותיות ול־${uniqueSettlements} יישובים — לא מספיק? 😜`,
-            `יש לי רעיונות ל־${uniqueLetters} אותיות ול־${uniqueSettlements} יישובים! מה עוד צריך בכלל? 🙃`,
-            `יש לי רעיונות ל־${uniqueLetters} אותיות ול־${uniqueSettlements} יישובים… זה כבר יותר מדי טוב. 😏`,
-            `יש לי רעיונות ל־${uniqueLetters} אותיות ול־${uniqueSettlements} יישובים! נראה אתכם מתעלים על זה. 😉`,
-            `יש לי רעיונות ל־${uniqueLetters} אותיות ול־${uniqueSettlements} יישובים — נראה לי שסגרנו פינה. 😌`,
-            `יש לי רעיונות ל־${uniqueLetters} אותיות ול־${uniqueSettlements} יישובים! מי מביא יותר? 😏`,
-            `יש לי רעיונות ל־${uniqueLetters} אותיות ול־${uniqueSettlements} יישובים… ואני רק מתחיל. 😜`,
-            `ראיתי פה איזה ${uniqueLetters} אותיות ו-${uniqueSettlements} יישובים. מה דעתכם? 🥸`,
-            `מזהה לפחות ${uniqueLetters} אותיות שטובות ל-${uniqueSettlements} יישובים. אל תגידו שקשה! 😎`
-        ];
+        if (uniqueSettlements === 1) {
+            phrases = [
+                `יישוב אחד אחרון נשאר! 🥵`,
+                `מצאתי אותו אצלי... ואתם? 🤔`,
+                `זהו, ננעלנו על יישוב בודד. רק לסיים אותו! 🎯`,
+                `יישוב אחד ויחיד מתאים למה שכתבתם. 🤓`,
+                `אין לאן לחמוק, רק יישוב אחד מתאים עכשיו. ⏳`
+            ];
+        } else if (uniqueSettlements <= 5) {
+            phrases = [
+                `רק ${uniqueSettlements} יישובים באים בחשבון. קטן עליכם! 💪`,
+                `הצטמצמנו ל-${uniqueSettlements} יישובים. מתחמם! 🔥`,
+                `עוד קצת! ${uniqueSettlements} יישובים נותרו. 🧐`,
+                `יש פה ${uniqueSettlements} יישובים במאגר שעונים על זה... אל תתייאשו. 🤫`,
+                `המעגל נסגר: ${uniqueSettlements} יישובים בלבד. קדימה! 🥸`
+            ];
+        } else {
+            phrases = [
+                `מזהה לפחות ${uniqueSettlements} יישובים שטובים פה. מה הבעיה? 😎`,
+                `יש לי ${uniqueSettlements} יישובים בראש... מחכה ללחיצה. 🥸`,
+                `עם ${uniqueSettlements} כאלו באופק, אין טעם לחשוב כל כך הרבה! 😜`,
+                `אני יכול למנות לפחות ${uniqueSettlements} תשובות. ואתם? 😏`,
+                `עדיין המון אפשרויות: ${uniqueSettlements} יישובים לשחק איתם. בואו נתקדם. 🙃`
+            ];
+        }
     }
 
     const randomMsg = phrases[Math.floor(Math.random() * phrases.length)];
@@ -659,7 +714,6 @@ function showInactivityTeaser() {
         document.getElementById('map-container').appendChild(teaserEl);
     }
 
-    // Parse the emoji out to style it separately if needed, though they look fine embedded. We'll extract the last character for emoji styling.
     const msgBody = randomMsg.slice(0, -2);
     const emoji = randomMsg.slice(-2).trim();
 
@@ -667,13 +721,13 @@ function showInactivityTeaser() {
 
     // Force reflow
     void teaserEl.offsetWidth;
-    teaserEl.classList.remove('blink');
-    teaserEl.classList.add('visible', 'blink');
+    // Removed blink class as requested
+    teaserEl.classList.add('visible');
     audioManager.playTeaserBlip();
 
-    // Remove the teaser after the blink animation finishes (3 * 0.6s = 1.8s + buffer = 2.5s)
+    // Remove the teaser after a shorter time (2.0s)
     if (state.teaserTimeout) clearTimeout(state.teaserTimeout);
-    state.teaserTimeout = setTimeout(hideInactivityTeaser, 2500);
+    state.teaserTimeout = setTimeout(hideInactivityTeaser, 2000);
 }
 
 function hideInactivityTeaser() {

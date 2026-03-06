@@ -1,4 +1,4 @@
-/* מַפָּאוֹת - Settlement Guessing Game */
+/* GeoBoor - Settlement Guessing Game */
 
 @import url('https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700&display=swap');
 
@@ -799,24 +799,6 @@ body {
 
 .inactivity-teaser.visible {
   opacity: 1;
-}
-
-.inactivity-teaser.blink {
-  animation: teaserBlink 0.6s ease-in-out 3;
-}
-
-@keyframes teaserBlink {
-
-  0%,
-  100% {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(1);
-  }
-
-  50% {
-    opacity: 0.4;
-    transform: translate(-50%, -50%) scale(1.05);
-  }
 }
 
 .inactivity-teaser .teaser-emoji {
