@@ -39,6 +39,19 @@ let state = {
     inactivityTimer: null
 };
 
+let bestScore = parseInt(localStorage.getItem('geoboor_best_score')) || 0;
+
+function updateScoreDisplays() {
+    scoreEl.textContent = state.score;
+    if (state.score > bestScore) {
+        bestScore = state.score;
+        localStorage.setItem('geoboor_best_score', bestScore);
+    }
+    if (bestScoreEl && bestScoreEl.textContent !== bestScore.toString()) {
+        bestScoreEl.textContent = bestScore;
+    }
+}
+
 const audioManager = new AudioManager();
 
 // ── DOM refs ──────────────────────────────────────────────────────
@@ -48,6 +61,9 @@ const svgOverlay = document.getElementById('svg-overlay');
 const circleEl = document.getElementById('settlement-circle');
 const currentStr = document.getElementById('current-string');
 const scoreEl = document.getElementById('score');
+const bestScoreEl = document.getElementById('best-score');
+
+if (bestScoreEl) bestScoreEl.textContent = bestScore;
 const infoPanel = document.getElementById('info-panel');
 const infoName = document.getElementById('info-name');
 const infoDetails = document.getElementById('info-details');
@@ -103,7 +119,7 @@ function hideCircle() {
 function addScore(bonus) {
     const total = POINTS_BASE + bonus;
     state.score += total;
-    scoreEl.textContent = state.score;
+    updateScoreDisplays();
     showBonus(total);
     audioManager.playPoints();
 }
@@ -218,7 +234,7 @@ function triggerEasterEgg(msg, points) {
 
         setTimeout(() => {
             state.score += points;
-            scoreEl.textContent = state.score;
+            updateScoreDisplays();
             scoreEl.style.transition = 'all 0.3s ease';
             scoreEl.style.color = '#4ecdc4';
             scoreEl.style.transform = 'scale(1.5)';
@@ -302,7 +318,7 @@ function closeGameOverModal() {
     // Halve the score as a penalty for failing but continuing
     const penalty = Math.ceil(state.score / 2);
     state.score -= penalty;
-    scoreEl.textContent = state.score;
+    updateScoreDisplays();
 
     if (penalty > 0) {
         showBonus(-penalty);
@@ -312,7 +328,7 @@ function closeGameOverModal() {
         scoreEl.textContent = "קוצץ בחצי!";
         setTimeout(() => {
             scoreEl.style.color = '';
-            scoreEl.textContent = state.score;
+            updateScoreDisplays();
         }, 1500);
     }
 
@@ -424,7 +440,7 @@ function showClue() {
     if (!options.length) return;
 
     state.score -= COST_CLUE;
-    scoreEl.textContent = state.score;
+    updateScoreDisplays();
     showBonus(-COST_CLUE);
     audioManager.playClue();
 
@@ -626,7 +642,7 @@ function fullReset() {
     state.displayOffset = 0;
     state.easterEggsFound.clear();
     clearForbid();
-    scoreEl.textContent = '0';
+    updateScoreDisplays();
     bonusFlash.textContent = '';
     bonusFlash.classList.remove('flash-anim');
     updateDisplay();
