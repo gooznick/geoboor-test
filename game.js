@@ -147,13 +147,17 @@ function showBonus(pts) {
 
 // ── Info panel ────────────────────────────────────────────────────
 
-function showInfoPanel(canonicalKey, extraMsg = '', missedAlias = '') {
+function showInfoPanel(canonicalKey, extraMsg = '', missedAlias = '', customTitle = null) {
     const entry = settlementsData[canonicalKey];
     if (!entry) return;
 
     const titleEl = document.getElementById('info-panel-title');
     if (titleEl) {
-        titleEl.textContent = state.score >= 500 ? "אתה (לא) בור!" : "אתה בור!";
+        if (customTitle !== null) {
+            titleEl.textContent = customTitle;
+        } else {
+            titleEl.textContent = state.score >= 500 ? "אתה (לא) בור!" : "אתה בור!";
+        }
     }
 
     if (missedAlias && missedAlias !== entry.name) {
@@ -410,12 +414,14 @@ function revealOption() {
 let clueTimer = null;
 
 function showClue() {
-    if (!state.chosenCircleKey) return;
     if (state.score < COST_CLUE) {
         scoreEl.style.color = '#e63946';
         setTimeout(() => { scoreEl.style.color = ''; }, 600);
         return;
     }
+
+    const options = chooseAll(state.current, allVariantKeys, state.forbidSet, keyVariantMap, [], baseVariantKeys, outpostKeys);
+    if (!options.length) return;
 
     state.score -= COST_CLUE;
     scoreEl.textContent = state.score;
@@ -425,13 +431,17 @@ function showClue() {
     const btnClue = document.getElementById('btn-clue');
     if (clueTimer) clearInterval(clueTimer);
 
-    const canonKey = state.chosenCircleKey;
-    const name = settlementsData[canonKey]?.name || canonKey;
+    const picked = randChoice(options);
+    const vKey = picked.key;
+    const canonKey = keyVariantMap[vKey];
+
+    // Use the specific alias matched, or fallback to the canonical name
+    const displayName = variantDisplayName[vKey] || settlementsData[canonKey]?.name || canonKey;
 
     let remaining = 5;
 
     const updateBtn = () => {
-        if (btnClue) btnClue.textContent = `🎯 ${name} (${remaining}s)`;
+        if (btnClue) btnClue.textContent = `🎯 ${displayName} (${remaining}s)`;
     };
     updateBtn();
 
