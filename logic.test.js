@@ -1,6 +1,6 @@
 const { chooseAll, stripAndReverse, isHebrewLetter, nameVariants, getVariants, buildDictionaries, checkEasterEggs } = require('./logic.js');
 
-describe('GeoBoor Game Logic', () => {
+describe('מַפָּאוֹת Game Logic', () => {
 
     test('isHebrewLetter checks', () => {
         expect(isHebrewLetter('א')).toBe(true);

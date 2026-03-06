@@ -1,4 +1,4 @@
-// GeoBoor - Settlement Guessing Game
+// מַפָּאוֹת - Settlement Guessing Game
 
 // ── Game Configuration ──────────────────────────────────────────────
 const COST_REVEAL = 100; // Cost to reveal history
@@ -230,6 +230,11 @@ function showGameOverModal(gatheredSet) {
     audioManager.playGameOver();
     gameOverScore.textContent = state.score + " נקודות";
     gameOverCompliment.textContent = getCompliment(state.score);
+
+    const modalTitle = gameOverModal.querySelector('.modal-title');
+    if (modalTitle) {
+        modalTitle.textContent = state.score >= 500 ? "אתה (לא) בור ועם הארץ בידיעת הארץ!" : "אתה בור ועם הארץ בידיעת הארץ!";
+    }
 
     gameOverList.innerHTML = '';
 
