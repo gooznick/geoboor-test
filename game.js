@@ -199,6 +199,7 @@ function hideInfoPanel() {
 // ── Easter Egg ────────────────────────────────────────────────────
 
 function triggerEasterEgg(msg, points) {
+    console.log("triggerEasterEgg", msg, points);
     audioManager.playEasterEgg();
     const floater = document.createElement('div');
     floater.className = 'easter-egg-heart pumping';
@@ -540,14 +541,20 @@ function handleLetter(ch) {
     updateDisplay();
     addScore(bonus);
 
-    // Check if it's an easter egg. check the state.compOptions
+    // make a set of all the last valid settlements if isBeginOfSettlement is true
+    const lastValidSettlements = new Set();
     for (const option of state.compOptions) {
-        // take the last fobidden in option (it's the last valid settlement)
-        const lastValid = option.forbidden[option.forbidden.length - 1];
+        if (option.isBeginOfSettlement) {
+            const lastValid = option.forbidden[option.forbidden.length - 1];
 
+            lastValidSettlements.add(lastValid);
+        }
+    }
+    // Check if it's an easter egg. 
+    for (const settlement of lastValidSettlements) {
         // check if displayName is in the easter egg list (easterEggData) and it's last letter
-        if (lastValid in easterEggData && option.isBeginOfSettlement) {
-            triggerEasterEgg(easterEggData[lastValid].msg, easterEggData[lastValid].points);
+        if (settlement in easterEggData) {
+            triggerEasterEgg(easterEggData[settlement].msg, easterEggData[settlement].points);
         }
     }
 
