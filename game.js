@@ -18,12 +18,6 @@ const BONUS_MED_PTS = 10;   // Med bonus points
 
 // ── State ─────────────────────────────────────────────────────────
 
-let settlementsData = {};       // canonKey → { name, aliases, x, y, ... }
-let keyVariantMap = {};         // variantKey → canonical key
-let variantDisplayName = {};    // variantKey → display name (name/alias that generated it)
-let allVariantKeys = new Set(); // all valid variant reversed-name strings
-let baseVariantKeys = new Set(); // strictly the unmodified names and aliases keys
-let outpostKeys = new Set();     // purely outpost keys (which the computer avoids randomly selecting)
 let easterEggData = {};         // Reversed validation string → {msg, points}
 let db = null;
 let canonicalToName = null;
@@ -91,7 +85,7 @@ function initSvg() {
 }
 
 function drawCircle(canonicalKey) {
-    const entry = settlementsData[canonicalKey];
+    const entry = db.get(canonicalKey);
     if (!entry) return;
     circleEl.setAttribute('cx', entry.x);
     circleEl.setAttribute('cy', entry.y);
@@ -757,23 +751,12 @@ async function init() {
     const raw = await gameResp.json();
     const eggsRaw = eggsResp ? await eggsResp.json() : {};
 
-    settlementsData = raw;
-
     const gameData = readGameData(raw);
     db = gameData.db;
     canonicalToName = gameData.canonicalToName;
 
     // Build keyVariantMap, variantDisplayName, allVariantKeys, baseVariantKeys
-    const dicts = buildDictionaries(raw);
-
-    // We update the globals instead of overriding them because other functions 
-    // might be looking at these specific references, though replacing them is usually fine.
-    // In this game's case, replacing the references is safe since `init()` is called once.
-    keyVariantMap = dicts.keyVariantMap;
-    variantDisplayName = dicts.variantDisplayName;
-    allVariantKeys = dicts.allVariantKeys;
-    baseVariantKeys = dicts.baseVariantKeys;
-    outpostKeys = dicts.outpostKeys;
+    // (Deprecated, removed from here)
 
     // Initialize easter eggs
     for (const [name, data] of Object.entries(eggsRaw)) {
