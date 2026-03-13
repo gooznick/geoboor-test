@@ -272,9 +272,9 @@ function readGameData(raw) {
             y: entry.y,
         });
 
-        canonicalToName.set(toCanonical(entry.name), [entry.name, entry.name]);
-        for (const a of aliases) canonicalToName.set(toCanonical(a), [entry.name, a]);
-        for (const o of outposts) canonicalToName.set(toCanonical(o), [entry.name, o, 'outpost']);
+        canonicalToName.set(toCanonical(entry.name), [canonKey, entry.name]);
+        for (const a of aliases) canonicalToName.set(toCanonical(a), [canonKey, a]);
+        for (const o of outposts) canonicalToName.set(toCanonical(o), [canonKey, o, 'outpost']);
     }
 
     // Second pass: for each entry whose original variant contains adjacent יי or וו,
@@ -351,13 +351,15 @@ function checkSequence(string, canonicalToName, forbidden, sequence, results) {
 
     if (!consumed) {
         // Report every canonical key that has `string` as a prefix
-        for (const [canonicalKey, [displayName]] of canonicalToName) {
+        for (const [canonicalKey, [displayName, originalVariant]] of canonicalToName) {
             if (canonicalKey.startsWith(string) && !forbidden.includes(displayName)) {
                 results.push({
                     sequence: [...sequence],
                     forbidden: [...forbidden],
                     lastCanonical: canonicalKey,
-                    lastName: displayName,
+                    letter: canonicalKey[string.length],
+                    lettersUntilEnd: canonicalKey.length - string.length,
+                    isBeginOfSettlement: string.length === 0
                 });
             }
         }
@@ -366,10 +368,10 @@ function checkSequence(string, canonicalToName, forbidden, sequence, results) {
 
 /**
  * Checks if the current string triggers any new easter eggs.
- * Mutates `foundEggsSet` by adding newly found keys.
- * Returns an array of triggered egg objects: [{ msg, points }, ...]
+ * Mutates `foundEggsSet` by adding nely found keys.
+ * Returns an array of triggered egg owbjects: [{ msg, points }, ...]
  */
-function checkEasterEggs(currentStr, easterEggData, keyVariantMap, foundEggsSet) {
+function checkEasterEggs(displayName, easterEggData, foundEggsSet) {
     const newlyFound = [];
     for (const [key, egg] of Object.entries(easterEggData)) {
         if (!foundEggsSet.has(key)) {

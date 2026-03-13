@@ -25,6 +25,8 @@ let allVariantKeys = new Set(); // all valid variant reversed-name strings
 let baseVariantKeys = new Set(); // strictly the unmodified names and aliases keys
 let outpostKeys = new Set();     // purely outpost keys (which the computer avoids randomly selecting)
 let easterEggData = {};         // Reversed validation string → {msg, points}
+let db = null;
+let canonicalToName = null;
 let state = {
     current: '',
     wrongLetter: null,
@@ -36,7 +38,9 @@ let state = {
     chosenCircleKey: null,
     displayOffset: 0,
     easterEggsFound: new Set(),
-    inactivityTimer: null
+    inactivityTimer: null,
+    compOptions: [],
+    allOptions: [],
 };
 
 let bestScore = parseInt(localStorage.getItem('geoboor_best_score')) || 0;
@@ -163,9 +167,8 @@ function showBonus(pts) {
 
 // ── Info panel ────────────────────────────────────────────────────
 
-function showInfoPanel(canonicalKey, extraMsg = '', missedAlias = '', customTitle = null) {
-    const entry = settlementsData[canonicalKey];
-    if (!entry) return;
+function showInfoPanel(originalVariant, extraMsg = '', displayName = '', customTitle = null) {
+
 
     const titleEl = document.getElementById('info-panel-title');
     if (titleEl) {
@@ -176,21 +179,19 @@ function showInfoPanel(canonicalKey, extraMsg = '', missedAlias = '', customTitl
         }
     }
 
-    if (missedAlias && missedAlias !== entry.name) {
-        infoName.textContent = `${entry.name} (${missedAlias})`;
+    if (originalVariant !== displayName) {
+        infoName.textContent = `${originalVariant} (${displayName})`;
     } else {
-        infoName.textContent = entry.name;
+        infoName.textContent = displayName;
     }
 
+    const entry = db.get(displayName);
+    if (entry) {
+        console.log(entry);
+    }
     infoDetails.innerHTML = `הוקם: ${entry.establishment} | תושבים: ${entry.population}`;
 
-    // Show aliases
-    if (entry.aliases && entry.aliases.length > 0) {
-        const otherAliases = entry.aliases.filter(a => a !== missedAlias);
-        if (otherAliases.length > 0) {
-            infoDetails.innerHTML += `<br><span style="font-size: 0.9em; opacity: 0.8">שמות נוספים: ${otherAliases.join(', ')}</span>`;
-        }
-    }
+
 
     if (extraMsg) {
         infoDetails.innerHTML += `<br>${extraMsg}`;
@@ -266,7 +267,7 @@ function getCompliment(score) {
     return "אגדה חיה! אין נקודה על המפה שאתם לא מכירים בעל פה! שלמות.";
 }
 
-function showGameOverModal(gatheredSet) {
+function showGameOverModal(uniqueCanonKeys) {
     audioManager.playGameOver();
     gameOverScore.textContent = state.score + " נקודות";
     gameOverCompliment.textContent = getCompliment(state.score);
@@ -278,19 +279,13 @@ function showGameOverModal(gatheredSet) {
 
     gameOverList.innerHTML = '';
 
-    // Convert set of variant keys to a unique list of canonical keys
-    const uniqueCanonKeys = new Set();
-    for (const vKey of gatheredSet) {
-        uniqueCanonKeys.add(keyVariantMap[vKey]);
-    }
-
     if (uniqueCanonKeys.size === 0) {
         const li = document.createElement('li');
         li.textContent = "לא הספקתם לאסוף יישובים הפעם.";
         gameOverList.appendChild(li);
     } else {
         for (const canonKey of uniqueCanonKeys) {
-            const entry = settlementsData[canonKey];
+            const entry = db.get(canonKey);
             if (!entry) continue;
 
             const li = document.createElement('li');
@@ -355,77 +350,6 @@ function setForbid(guaranteed) {
 
 let revealTimer = null;
 
-function revealOption() {
-    if (state.score < COST_REVEAL) {
-        // Flash the score to indicate not enough points
-        scoreEl.style.color = '#e63946';
-        setTimeout(() => { scoreEl.style.color = ''; }, 600);
-        return;
-    }
-
-    // Pass baseVariantKeys so the computer only reveals/selects base keys for new terms
-    const playableOptions = chooseAll(state.current, allVariantKeys, state.forbidSet, keyVariantMap, [], baseVariantKeys);
-    const options = playableOptions.length ? playableOptions : chooseAll(state.current, allVariantKeys, new Set(), keyVariantMap, [], baseVariantKeys);
-
-    if (!options.length) return; // shouldn't happen unless current string is invalid
-
-    // Hint should also favor non-outposts if possible
-    const nonOutpostOptions = options.filter(opt => !outpostKeys.has(opt.key));
-    const compOptions = nonOutpostOptions.length > 0 ? nonOutpostOptions : options;
-
-    const picked = randChoice(compOptions);
-    const settlementsToShow = picked.former; // Only show the history, not the current one
-
-    if (settlementsToShow.length === 0) {
-        // If there's no history yet, don't deduct points or show an empty box
-        const btnReveal = document.getElementById('btn-reveal');
-        const oldText = btnReveal.textContent;
-        btnReveal.textContent = "אין היסטוריה";
-        setTimeout(() => { btnReveal.textContent = oldText; }, 1500);
-        return;
-    }
-
-    // Deduct points
-    state.score -= COST_REVEAL;
-    scoreEl.textContent = state.score;
-    showBonus(-COST_REVEAL);
-
-    // Populate the list
-    revealListEl.innerHTML = '';
-    for (const vKey of settlementsToShow) {
-        const canonKey = keyVariantMap[vKey];
-        const name = variantDisplayName[vKey] || settlementsData[canonKey]?.name || canonKey;
-        const li = document.createElement('li');
-        li.textContent = name;
-        revealListEl.appendChild(li);
-    }
-
-    // Show the list
-    revealListEl.classList.add('visible');
-
-    const btnReveal = document.getElementById('btn-reveal');
-    if (revealTimer) clearInterval(revealTimer);
-
-    let remaining = 5;
-
-    const updateBtn = () => {
-        if (btnReveal) btnReveal.textContent = `👁 ${remaining}s...`;
-    };
-    updateBtn();
-
-    revealTimer = setInterval(() => {
-        remaining--;
-        if (remaining <= 0) {
-            clearInterval(revealTimer);
-            revealTimer = null;
-            if (btnReveal) {
-                btnReveal.textContent = `👁 ארכיון (${COST_REVEAL} נק')`;
-            }
-        } else {
-            updateBtn();
-        }
-    }, 1000);
-}
 
 let clueTimer = null;
 
@@ -436,8 +360,13 @@ function showClue() {
         return;
     }
 
-    const options = chooseAll(state.current, allVariantKeys, state.forbidSet, keyVariantMap, [], baseVariantKeys, outpostKeys);
-    if (!options.length) return;
+    const nonMetadataOptions = checkResults.filter(r => {
+        const metadata = canonicalToName.get(r.lastCanonical)[2];
+        return metadata !== "short" && metadata !== "outpost";
+    });
+    const compOptions2 = nonMetadataOptions.length > 0 ? nonMetadataOptions : checkResults;
+
+    const picked = randChoice(compOptions);
 
     state.score -= COST_CLUE;
     updateScoreDisplays();
@@ -447,17 +376,14 @@ function showClue() {
     const btnClue = document.getElementById('btn-clue');
     if (clueTimer) clearInterval(clueTimer);
 
-    const picked = randChoice(options);
-    const vKey = picked.key;
-    const canonKey = keyVariantMap[vKey];
 
-    // Use the specific alias matched, or fallback to the canonical name
-    const displayName = variantDisplayName[vKey] || settlementsData[canonKey]?.name || canonKey;
+    const [displayName, originalVariant, metadata] = canonicalToName.get(picked.lastCanonical);
+
 
     let remaining = 5;
 
     const updateBtn = () => {
-        if (btnClue) btnClue.textContent = `🎯 ${displayName} (${remaining}s)`;
+        if (btnClue) btnClue.textContent = `🎯 ${originalVariant} (${remaining}s)`;
     };
     updateBtn();
 
@@ -546,78 +472,99 @@ function handleLetter(ch) {
     }
     state.lastKeyTime = now;
 
+    // check if user char is in the options (state.allOptions) or it's first move
+    isLegal = state.allOptions.some(option => option.letter === ch) || !state.current.length;
+
+
     const userCurrent = ch + state.current;
 
-    // Easter Egg Check (user turn)
-    const newlyFoundUser = checkEasterEggs(userCurrent, easterEggData, keyVariantMap, state.easterEggsFound);
-    for (const egg of newlyFoundUser) {
-        triggerEasterEgg(egg.msg, egg.points);
-    }
 
-    const options = chooseAll(userCurrent, allVariantKeys, state.forbidSet, keyVariantMap, [], baseVariantKeys, outpostKeys);
+    if (!isLegal) {
+        console.log("Illegal move", state.compNext);
+        const [displayName, originalVariant, metadata] = canonicalToName.get(state.compNext.lastCanonical);
 
-    if (!options.length) {
-        // MISTAKE: find best option from the state BEFORE the wrong key
-        // (mirrors: options = choose_all(current[1:], settlements, forbid))
-        const prevOptions = chooseAll(state.current, allVariantKeys, state.forbidSet, keyVariantMap, [], baseVariantKeys, outpostKeys);
-
-        let gatheredSet = new Set();
-        if (prevOptions.length) {
-            let candidates = prevOptions.filter(opt => {
-                const remainder = opt.key.slice(0, opt.key.length - state.current.length);
-                return remainder.includes(ch);
-            });
-            if (candidates.length === 0) candidates = prevOptions;
-
-            const picked = randChoice(candidates);
-            const canonKey = keyVariantMap[picked.key];
-            const missedAlias = variantDisplayName[picked.key];
-
-            showMistakeCircle(canonKey);
-            showInfoPanel(canonKey, '', missedAlias);
-
-            // Set forbid to guaranteed-consumed settlements (REPLACE, not accumulate)
-            const guaranteed = findAllFormer(prevOptions);
-            if (guaranteed.size) setForbid(guaranteed);
-            gatheredSet = guaranteed;
-        }
+        console.log("Illegal move", displayName, originalVariant, metadata);
+        showMistakeCircle(displayName);
+        showInfoPanel(originalVariant, '', displayName);
 
         // Save the mistake and show it
         state.wrongLetter = ch;
         updateDisplay();
 
-        // Show Game Over Modal after a short delay so the user can see their mistake
+        //Show Game Over Modal after a short delay so the user can see their mistake
         setTimeout(() => {
-            showGameOverModal(gatheredSet);
+            showGameOverModal(state.allOptions[0].forbidden);
         }, 1200);
         return;
     }
 
     hideInfoPanel();
 
-    // The computer prefers to choose non-outpost settlements if available.
-    // It only picks an outpost if absolutely forced (i.e. the user typed a string only matching outposts).
-    const nonOutpostOptions = options.filter(opt => !outpostKeys.has(opt.key));
-    const compOptions = nonOutpostOptions.length > 0 ? nonOutpostOptions : options;
 
-    const picked = randChoice(compOptions);
-    // Always normalize the computer's letter — no sofiot in the string!
-    const compLetter = removeSofit(picked.letter);
-    const canonKey = keyVariantMap[picked.key];
+
+    // Computer finds the next one (for him to choose)
+    const forwardString1 = userCurrent.split('').reverse().join('');
+    const checkResults1 = [];
+    checkSequence(forwardString1, canonicalToName, [], [], checkResults1);
+    const nonMetadataOptions1 = checkResults1.filter(r => {
+        const metadata = canonicalToName.get(r.lastCanonical)[2];
+        return metadata !== "short" && metadata !== "outpost";
+    });
+    const compOptions1 = nonMetadataOptions1.length > 0 ? nonMetadataOptions1 : checkResults1;
+    if (compOptions1.length === 0) {
+        showGameOverModal(state.compNext);
+        return;
+    }
+    choice = randChoice(compOptions1)
+    const compLetter = choice.letter;
 
     audioManager.playComputerSelect();
 
     state.current = compLetter + userCurrent;
 
-    drawCircle(canonKey);
+    // Check if it's an easter egg. 
+
+    // take the last fobidden in option (it's the last valid settlement)
+    const lastValid = choice.forbidden[choice.forbidden.length - 1];
+
+    // check if displayName is in the easter egg list (easterEggData) and it's last letter
+    if (lastValid in easterEggData && choice.isBeginOfSettlement) {
+        triggerEasterEgg(easterEggData[lastValid].msg, easterEggData[lastValid].points);
+    }
+
+
+
+    // Computer finds the next one (for the user to choose)
+    const forwardString = state.current.split('').reverse().join('');
+    const checkResults = [];
+    checkSequence(forwardString, canonicalToName, [], [], checkResults);
+    const nonMetadataOptions = checkResults.filter(r => {
+        const metadata = canonicalToName.get(r.lastCanonical)[2];
+        return metadata !== "short" && metadata !== "outpost";
+    });
+
+
+    const compOptions = nonMetadataOptions.length > 0 ? nonMetadataOptions : checkResults;
+    state.compOptions = compOptions;
+    state.compNext = randChoice(compOptions);
+    state.allOptions = nonMetadataOptions;
+    const [displayName, originalVariant, metadata] = canonicalToName.get(state.compNext.lastCanonical);
+
+    drawCircle(displayName);
     updateDisplay();
     addScore(bonus);
 
-    // Easter Egg Check (computer turn)
-    const newlyFoundComp = checkEasterEggs(state.current, easterEggData, keyVariantMap, state.easterEggsFound);
-    for (const egg of newlyFoundComp) {
-        triggerEasterEgg(egg.msg, egg.points);
+    // Check if it's an easter egg. check the state.compOptions
+    for (const option of state.compOptions) {
+        // take the last fobidden in option (it's the last valid settlement)
+        const lastValid = option.forbidden[option.forbidden.length - 1];
+
+        // check if displayName is in the easter egg list (easterEggData) and it's last letter
+        if (lastValid in easterEggData && option.isBeginOfSettlement) {
+            triggerEasterEgg(easterEggData[lastValid].msg, easterEggData[lastValid].points);
+        }
     }
+
 }
 
 function softReset() {
@@ -664,11 +611,21 @@ function resetInactivityTimer() {
 function showInactivityTeaser() {
     if (state.wrongLetter || gameOverModal.classList.contains('visible')) return;
 
-    const options = chooseAll(state.current, allVariantKeys, state.forbidSet, keyVariantMap, [], baseVariantKeys, outpostKeys);
-    if (!options.length) return;
+    const checkResults = [];
+    // userCurrent is built right-to-left, so reverse it for checkSequence which reads left-to-right
+    const forwardString = state.current.split('').reverse().join('');
+    checkSequence(forwardString, canonicalToName, [], [], checkResults);
 
-    const uniqueLetters = new Set(options.map(opt => opt.letter)).size;
-    const uniqueSettlements = new Set(options.map(opt => keyVariantMap[opt.key])).size;
+
+    const nonMetadataOptions = checkResults.filter(r => {
+        const metadata = canonicalToName.get(r.lastCanonical)[2];
+        return metadata !== "short" && metadata !== "outpost";
+    });
+    const compOptions = nonMetadataOptions.length > 0 ? nonMetadataOptions : checkResults;
+    if (!compOptions.length) return;
+
+    const uniqueLetters = new Set(compOptions.map(opt => opt.letter)).size;
+    const uniqueSettlements = new Set(compOptions.map(opt => canonicalToName.get(opt.lastCanonical)[0])).size;
 
     // Don't show the teaser if it's the start of the game or if there are too many options
     if (uniqueSettlements > 40) return;
@@ -802,6 +759,10 @@ async function init() {
 
     settlementsData = raw;
 
+    const gameData = readGameData(raw);
+    db = gameData.db;
+    canonicalToName = gameData.canonicalToName;
+
     // Build keyVariantMap, variantDisplayName, allVariantKeys, baseVariantKeys
     const dicts = buildDictionaries(raw);
 
@@ -816,8 +777,7 @@ async function init() {
 
     // Initialize easter eggs
     for (const [name, data] of Object.entries(eggsRaw)) {
-        const key = stripAndReverse(name);
-        easterEggData[key] = data; // store object with msg and points
+        easterEggData[name] = data; // store object with msg and points
     }
 
     // Init Hint buttons with constants
