@@ -190,6 +190,55 @@ body {
   }
 }
 
+.found-circle {
+  fill: rgba(78, 205, 196, 0.2);
+  stroke: #4ecdc4;
+  stroke-width: 2;
+  filter: drop-shadow(0 0 6px rgba(78, 205, 196, 0.8));
+}
+
+.mistake-circle {
+  fill: rgba(230, 57, 70, 0.3);
+  stroke: var(--accent);
+  stroke-width: 4;
+  filter: drop-shadow(0 0 10px rgba(230, 57, 70, 1));
+  animation: mistakePump 2s ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+@keyframes mistakePump {
+  0% {
+    transform: scale(1);
+    stroke-width: 3;
+  }
+
+  10% {
+    transform: scale(1.6);
+    stroke-width: 6;
+  }
+
+  25% {
+    transform: scale(1);
+    stroke-width: 3;
+  }
+
+  40% {
+    transform: scale(1.6);
+    stroke-width: 6;
+  }
+
+  55% {
+    transform: scale(1);
+    stroke-width: 3;
+  }
+
+  100% {
+    transform: scale(1);
+    stroke-width: 3;
+  }
+}
+
 /* ── Right side panel ── */
 #side-panel {
   flex: 1;

@@ -45,42 +45,8 @@ class AudioManager {
         if (this.isPlayingBgm) return;
         this.isPlayingBgm = true;
 
-        // An ambient, evolving drone using two detuned sine oscillators
-
-        this.bgmGain = this.audioCtx.createGain();
-        // Very quiet drone
-        this.bgmGain.gain.value = 0.05;
-        this.bgmGain.connect(this.masterGain);
-
-        this.bgmOsc1 = this.audioCtx.createOscillator();
-        this.bgmOsc1.type = 'sine';
-        this.bgmOsc1.frequency.value = 110; // A2
-        this.bgmOsc1.connect(this.bgmGain);
-
-        this.bgmOsc2 = this.audioCtx.createOscillator();
-        this.bgmOsc2.type = 'sine';
-        this.bgmOsc2.frequency.value = 111.5; // Slight detune for phasing/beating
-        this.bgmOsc2.connect(this.bgmGain);
-
-        // Slowly modulate the gain to make it "breathe"
-        const now = this.audioCtx.currentTime;
-        this.bgmGain.gain.setValueAtTime(0, now);
-        this.bgmGain.gain.linearRampToValueAtTime(0.05, now + 3); // Fade in over 3s
-
-        // Loop a breath cycle using an LFO on the gain
-        this.lfo = this.audioCtx.createOscillator();
-        this.lfo.type = 'sine';
-        this.lfo.frequency.value = 0.05; // 20-second cycle
-
-        this.lfoGain = this.audioCtx.createGain();
-        this.lfoGain.gain.value = 0.03; // Depth of breath
-
-        this.lfo.connect(this.lfoGain);
-        this.lfoGain.connect(this.bgmGain.gain);
-
-        this.bgmOsc1.start();
-        this.bgmOsc2.start();
-        this.lfo.start();
+        // The user requested to remove the background drone ("pumping sound")
+        // Keeping this function mostly empty so state variables stay consistent.
     }
 
     stopBgMusic() {

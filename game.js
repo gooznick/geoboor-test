@@ -35,6 +35,7 @@ let state = {
     inactivityTimer: null,
     compOptions: [],
     allOptions: [],
+    gameOverTimeout: null,
 };
 
 let bestScore = parseInt(localStorage.getItem('geoboor_best_score')) || 0;
@@ -100,13 +101,47 @@ function drawCircle(canonicalKey) {
     state.chosenCircleKey = canonicalKey;
 }
 
-function showMistakeCircle(canonicalKey) {
-    drawCircle(canonicalKey);
+function clearExtraCircles() {
+    const extras = svgOverlay.querySelectorAll('.found-circle, .mistake-circle');
+    extras.forEach(el => el.remove());
+}
+
+function showMistakeCircle(missedName, foundNames = []) {
+    drawCircle(missedName);
+    circleEl.style.display = 'none';
+    clearExtraCircles();
+
+    // Draw found settlements
+    for (const name of foundNames) {
+        const entry = db.get(name);
+        if (entry) {
+            const mc = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            mc.classList.add('found-circle');
+            mc.setAttribute('cx', entry.x);
+            mc.setAttribute('cy', entry.y);
+            mc.setAttribute('r', 10);
+            svgOverlay.appendChild(mc);
+        }
+    }
+
+    // Draw mistake
+    const entry = db.get(missedName);
+    if (entry) {
+        const mc = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        mc.classList.add('mistake-circle');
+        mc.setAttribute('cx', entry.x);
+        mc.setAttribute('cy', entry.y);
+        mc.setAttribute('r', 12);
+        svgOverlay.appendChild(mc);
+    }
+
+    audioManager.playGameOver();
 }
 
 function hideCircle() {
     circleEl.style.display = 'none';
     circleEl.classList.remove('active');
+    clearExtraCircles();
     if (clueTimer) { clearInterval(clueTimer); clueTimer = null; }
     const btnClue = document.getElementById('btn-clue');
     if (btnClue) btnClue.textContent = `🎯 רמז (${COST_CLUE} נק')`;
@@ -260,8 +295,10 @@ function getCompliment(score) {
     return "אגדה חיה! אין נקודה על המפה שאתם לא מכירים בעל פה! שלמות.";
 }
 
-function showGameOverModal(uniqueCanonKeys) {
-    audioManager.playGameOver();
+function showGameOverModal(foundNames, missedName = null, skipAudio = false) {
+    if (!skipAudio) {
+        audioManager.playGameOver();
+    }
     gameOverScore.textContent = state.score + " נקודות";
     gameOverCompliment.textContent = getCompliment(state.score);
 
@@ -272,13 +309,30 @@ function showGameOverModal(uniqueCanonKeys) {
 
     gameOverList.innerHTML = '';
 
-    if (uniqueCanonKeys.size === 0) {
+    const uniqueNames = new Set(foundNames || []);
+
+    const missedContainer = document.getElementById('game-over-missed-container');
+    const missedNameEl = document.getElementById('game-over-missed-name');
+    const missedDataEl = document.getElementById('game-over-missed-data');
+
+    if (missedName) {
+        const entry = db.get(missedName);
+        if (entry && missedContainer) {
+            missedNameEl.textContent = entry.name;
+            missedDataEl.textContent = `הוקם: ${entry.establishment} | תושבים: ${entry.population}`;
+            missedContainer.style.display = 'block';
+        }
+    } else if (missedContainer) {
+        missedContainer.style.display = 'none';
+    }
+
+    if (uniqueNames.size === 0 && !missedName) {
         const li = document.createElement('li');
         li.textContent = "לא הספקתם לאסוף יישובים הפעם.";
         gameOverList.appendChild(li);
     } else {
-        for (const canonKey of uniqueCanonKeys) {
-            const entry = db.get(canonKey);
+        for (const displayName of uniqueNames) {
+            const entry = db.get(displayName);
             if (!entry) continue;
 
             const li = document.createElement('li');
@@ -468,18 +522,20 @@ function handleLetter(ch) {
 
     if (!isLegal) {
         const [displayName, originalVariant, metadata] = canonicalToName.get(state.compNext.lastCanonical);
+        const foundNames = state.allOptions.length > 0 ? state.allOptions[0].forbidden : [];
 
-        showMistakeCircle(displayName);
+        showMistakeCircle(displayName, foundNames);
         showInfoPanel(originalVariant, '', displayName);
 
         // Save the mistake and show it
         state.wrongLetter = ch;
         updateDisplay();
 
-        //Show Game Over Modal after a short delay so the user can see their mistake
-        setTimeout(() => {
-            showGameOverModal(state.allOptions[0].forbidden);
-        }, 1200);
+        //Show Game Over Modal after a short pump delay
+        if (state.gameOverTimeout) clearTimeout(state.gameOverTimeout);
+        state.gameOverTimeout = setTimeout(() => {
+            showGameOverModal(foundNames, displayName, true);
+        }, 4000);
         return;
     }
 
@@ -497,7 +553,9 @@ function handleLetter(ch) {
     });
     const compOptions1 = nonMetadataOptions1.length > 0 ? nonMetadataOptions1 : checkResults1;
     if (compOptions1.length === 0) {
-        showGameOverModal(state.compNext);
+        const [displayName, originalVariant, metadata] = canonicalToName.get(state.compNext.lastCanonical);
+        const foundNames = state.allOptions.length > 0 ? state.allOptions[0].forbidden : [];
+        showGameOverModal(foundNames, displayName);
         return;
     }
     choice = randChoice(compOptions1)
@@ -559,6 +617,10 @@ function handleLetter(ch) {
 }
 
 function softReset() {
+    if (state.gameOverTimeout) {
+        clearTimeout(state.gameOverTimeout);
+        state.gameOverTimeout = null;
+    }
     state.current = '';
     state.wrongLetter = null;
     state.lastKeyTime = null;
@@ -573,6 +635,10 @@ function softReset() {
 }
 
 function fullReset() {
+    if (state.gameOverTimeout) {
+        clearTimeout(state.gameOverTimeout);
+        state.gameOverTimeout = null;
+    }
     state.current = '';
     state.wrongLetter = null;
     state.score = 0;
