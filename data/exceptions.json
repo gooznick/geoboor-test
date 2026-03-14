@@ -656,4 +656,333 @@
         "itm_east": 195171,
         "itm_north": 669096
     },
+    "בית חזון": {
+        "name": "",
+        "population": "",
+        "establishment": "1953",
+        "aliases": [],
+        "outposts": [
+            "בית חזון"
+        ],
+        "itm_east": 191920,
+        "itm_north": 699262,
+        "x": 97,
+        "y": 184
+    },
+    "הר חלוץ": {
+        "name": "הר חלוץ",
+        "population": "464",
+        "establishment": "1985",
+        "aliases": [
+            ""
+        ],
+        "outposts": [],
+        "itm_east": 229540,
+        "itm_north": 761736,
+        "x": 148,
+        "y": 102
+    },
+    "הררית": {
+        "name": "הררית",
+        "population": "640",
+        "establishment": "1982",
+        "aliases": [],
+        "outposts": [
+            "יחד"
+        ],
+        "itm_east": 234773,
+        "itm_north": 750160,
+        "x": 154,
+        "y": 117
+    },
+    "חוות גלעד": {
+        "name": "",
+        "population": "",
+        "establishment": "2002",
+        "aliases": [],
+        "outposts": [
+            "חוות גלעד"
+        ],
+        "itm_east": 217283,
+        "itm_north": 678466,
+        "x": 131,
+        "y": 211
+    },
+    "חירן": {
+        "name": "חירן",
+        "population": "",
+        "establishment": "",
+        "aliases": [
+            "חירן"
+        ],
+        "outposts": [],
+        "itm_east": 199706,
+        "itm_north": 580989,
+        "x": 107,
+        "y": 339
+    },
+    "חרשה": {
+        "name": "חרשה",
+        "population": "",
+        "establishment": "1999",
+        "aliases": [],
+        "outposts": [],
+        "itm_east": 214245,
+        "itm_north": 650165,
+        "x": 126,
+        "y": 248
+    },
+    "טל מנשה": {
+        "name": "טל מנשה",
+        "population": "",
+        "establishment": "1991",
+        "aliases": [],
+        "outposts": [],
+        "itm_east": 215331,
+        "itm_north": 709856,
+        "x": 128,
+        "y": 170
+    },
+    "ימין אורד": {
+        "name": "",
+        "population": "500",
+        "establishment": "1953",
+        "aliases": [],
+        "outposts": [
+            "ימין אורד"
+        ],
+        "itm_east": 199126,
+        "itm_north": 734230,
+        "x": 107,
+        "y": 138
+    },
+    "כפר אלדד": {
+        "name": "כפר אלדד",
+        "population": "200",
+        "establishment": "1994",
+        "aliases": [],
+        "outposts": [],
+        "itm_east": 223857,
+        "itm_north": 617941,
+        "x": 139,
+        "y": 290
+    },
+    "כרמית": {
+        "name": "כרמית",
+        "population": "",
+        "establishment": "",
+        "aliases": [],
+        "outposts": [],
+        "itm_east": 190504,
+        "itm_north": 582725,
+        "x": 94,
+        "y": 337
+    },
+    "מעלה חבר": {
+        "name": "מעלה חבר",
+        "population": "635",
+        "establishment": "1982",
+        "aliases": [
+            "פני חבר"
+        ],
+        "outposts": [],
+        "itm_east": 215814,
+        "itm_north": 599337,
+        "x": 128,
+        "y": 315
+    },
+    "מעלה צביה": {
+        "name": "מעלה צביה",
+        "population": "327",
+        "establishment": "1979",
+        "aliases": [],
+        "outposts": [],
+        "itm_east": 231336,
+        "itm_north": 754956,
+        "x": 150,
+        "y": 111
+    },
+    "מעלה רחבעם": {
+        "name": "",
+        "population": "",
+        "establishment": "2001",
+        "aliases": [],
+        "outposts": [
+            "מעלה רחבעם"
+        ],
+        "itm_east": 224542,
+        "itm_north": 617233,
+        "x": 140,
+        "y": 291
+    },
+    "נופי נחמיה": {
+        "name": "נופי נחמיה",
+        "population": "",
+        "establishment": "2002",
+        "aliases": [
+            "נופי נחמיה"
+        ],
+        "outposts": [],
+        "itm_east": 222420,
+        "itm_north": 667198,
+        "x": 137,
+        "y": 226
+    },
+    "נופי פרת": {
+        "name": "נופי פרת",
+        "population": "",
+        "establishment": "1992",
+        "aliases": [],
+        "outposts": [],
+        "itm_east": 230406,
+        "itm_north": 636808,
+        "x": 148,
+        "y": 265
+    },
+    "עדי עד": {
+        "name": "",
+        "population": "",
+        "establishment": "1998",
+        "aliases": [],
+        "outposts": [
+            "עדי עד"
+        ],
+        "itm_east": 231779,
+        "itm_north": 660832,
+        "x": 150,
+        "y": 234
+    },
+    "עינבר": {
+        "name": "",
+        "population": "",
+        "establishment": "",
+        "aliases": [],
+        "outposts": [
+            "ענבר",
+            "עינבר"
+        ],
+        "itm_east": -1133046,
+        "itm_north": 2615178,
+        "x": -1657,
+        "y": -2316
+    },
+    "פני קדם": {
+        "name": "",
+        "population": "",
+        "establishment": "2000",
+        "aliases": [],
+        "outposts": [
+            "פני קדם",
+            "אספר"
+        ],
+        "itm_east": 218639,
+        "itm_north": 610671,
+        "x": 132,
+        "y": 300
+    },
+    "קדיתא": {
+        "name": "",
+        "population": "240",
+        "establishment": "",
+        "aliases": [],
+        "outposts": [
+            "קדיתא",
+            "כדיתא"
+        ],
+        "itm_east": 243995,
+        "itm_north": 767866,
+        "x": 167,
+        "y": 94
+    },
+    "קדש ברנע": {
+        "name": "קדש ברנע",
+        "population": "",
+        "establishment": "",
+        "aliases": [],
+        "outposts": [
+            "ניצני סיני"
+        ],
+        "itm_east": 144476,
+        "itm_north": 506711,
+        "x": 33,
+        "y": 436
+    },
+    "קלע אלון": {
+        "name": "קלע אלון",
+        "population": "224",
+        "establishment": "1991",
+        "aliases": [
+            "קלע",
+            "ברוכים"
+        ],
+        "outposts": [],
+        "itm_east": 264429,
+        "itm_north": 781952,
+        "x": 194,
+        "y": 75
+    },
+    "רמת טראמפ": {
+        "name": "רמת טראמפ",
+        "population": "",
+        "establishment": "2019",
+        "aliases": [
+            "רמת הנשיא טראמפ"
+        ],
+        "outposts": [],
+        "itm_east": 264816,
+        "itm_north": 781997,
+        "x": 195,
+        "y": 75
+    },
+    "שבות רחל": {
+        "name": "שבות רחל",
+        "population": "500",
+        "establishment": "1991",
+        "aliases": [],
+        "outposts": [],
+        "itm_east": 229535,
+        "itm_north": 662334,
+        "x": 147,
+        "y": 232
+    },
+    "שדה בר": {
+        "name": "שדה בר",
+        "population": "",
+        "establishment": "1998",
+        "aliases": [
+            "שדה בר"
+        ],
+        "outposts": [],
+        "itm_east": 223242,
+        "itm_north": 618686,
+        "x": 138,
+        "y": 289
+    },
+    "שלפים": {
+        "name": "",
+        "population": "",
+        "establishment": "2016",
+        "aliases": [],
+        "outposts": [
+            "שלפים"
+        ],
+        "itm_east": 245052,
+        "itm_north": 709147,
+        "x": 168,
+        "y": 171
+    },
+    "": {
+        "name": "",
+        "population": "571",
+        "establishment": "1982",
+        "aliases": [],
+        "outposts": [
+            "שני",
+            "ליבנה"
+        ],
+        "itm_east": 206674,
+        "itm_north": 584895,
+        "x": 116,
+        "y": 334
+    }
 }

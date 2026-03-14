@@ -805,22 +805,16 @@ function showMetadataTeaser(type) {
     if (type === 'short') {
         phrases = [
             "זורם איתך על כתיב חסר 🤷",
-            "מחליק לך על הכתיב 🤫",
             "שיהיה כתיב חסר הפעם 😅",
             "לא נתקטנן על כתיב חסר 📝",
-            "כתיב חסר התקבל בברכה ✅",
-            "פסדר, נזרום עם כתיב חסר 🦦",
-            "נראה שאין ברירה אלא כתיב חסר 🧐"
+            "פסדר, נזרום עם כתיב חסר 🦦"
         ];
     } else if (type === 'outpost') {
         phrases = [
             "זורם איתך על ישוב לא רשמי ⛺",
-            "יאללה, גם מאחז תופס 🚜",
-            "מאושר פה אחד: ישוב לא רשמי 📜",
-            "מכיר גם את המאחזים הכי נידחים חחח 🐐",
-            "קיבלתי את הישוב הלא רשמי 🤝",
-            "זרמתי הפעם על חוות בודדים 🐑",
-            "מאחז זה לא תירוץ, זורם 😎"
+            "יאללה, גם ישוב לא רשמי תופס 🚜",
+            "מכיר גם את הישובים הכי נידחים חחח 🐐",
+            "קיבלתי את הישוב הלא רשמי 🤝"
         ];
     } else {
         return;
@@ -882,14 +876,16 @@ document.addEventListener('keydown', (e) => {
 // ── Init ──────────────────────────────────────────────────────────
 
 async function init() {
-    const [gameResp, eggsResp] = await Promise.all([
+    const [gameResp, eggsResp, excResp] = await Promise.all([
         fetch('data/game_data.json'),
-        fetch('data/easter_eggs.json').catch(() => null) // Ignore missing file just in case
+        fetch('data/easter_eggs.json').catch(() => null), // Ignore missing file just in case
+        fetch('data/exceptions.json').catch(() => null)
     ]);
     const raw = await gameResp.json();
     const eggsRaw = eggsResp ? await eggsResp.json() : {};
+    const exceptionsRaw = excResp ? await excResp.json() : null;
 
-    const gameData = readGameData(raw);
+    const gameData = readGameData(raw, exceptionsRaw);
     db = gameData.db;
     canonicalToName = gameData.canonicalToName;
 
