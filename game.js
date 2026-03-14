@@ -572,7 +572,16 @@ function handleLetter(ch) {
         showGameOverModal(foundNames, displayName);
         return;
     }
-    choice = randChoice(compOptions1)
+    choice = randChoice(compOptions1);
+
+    // If we were forced to use a metadata option, show a teaser
+    if (nonMetadataOptions1.length === 0) {
+        const metadata = canonicalToName.get(choice.lastCanonical)[2];
+        if (metadata === 'short' || metadata === 'outpost') {
+            showMetadataTeaser(metadata);
+        }
+    }
+
     const compLetter = choice.letter;
 
     audioManager.playComputerSelect();
@@ -789,6 +798,58 @@ function hideInactivityTeaser() {
     if (teaserEl) {
         teaserEl.classList.remove('visible');
     }
+}
+
+function showMetadataTeaser(type) {
+    let phrases = [];
+    if (type === 'short') {
+        phrases = [
+            "זורם איתך על כתיב חסר 🤷",
+            "מחליק לך על הכתיב 🤫",
+            "שיהיה כתיב חסר הפעם 😅",
+            "לא נתקטנן על כתיב חסר 📝",
+            "כתיב חסר התקבל בברכה ✅",
+            "פסדר, נזרום עם כתיב חסר 🦦",
+            "נראה שאין ברירה אלא כתיב חסר 🧐"
+        ];
+    } else if (type === 'outpost') {
+        phrases = [
+            "זורם איתך על ישוב לא רשמי ⛺",
+            "יאללה, גם מאחז תופס 🚜",
+            "מאושר פה אחד: ישוב לא רשמי 📜",
+            "מכיר גם את המאחזים הכי נידחים חחח 🐐",
+            "קיבלתי את הישוב הלא רשמי 🤝",
+            "זרמתי הפעם על חוות בודדים 🐑",
+            "מאחז זה לא תירוץ, זורם 😎"
+        ];
+    } else {
+        return;
+    }
+
+    const randomMsg = phrases[Math.floor(Math.random() * phrases.length)];
+
+    let teaserEl = document.getElementById('inactivity-teaser');
+    if (!teaserEl) {
+        teaserEl = document.createElement('div');
+        teaserEl.id = 'inactivity-teaser';
+        teaserEl.className = 'inactivity-teaser';
+        document.getElementById('map-container').appendChild(teaserEl);
+    }
+
+    const msgBody = randomMsg.slice(0, -2);
+    const emoji = randomMsg.slice(-2).trim();
+
+    teaserEl.innerHTML = `${msgBody}<span class="teaser-emoji">${emoji}</span>`;
+
+    // Force reflow
+    void teaserEl.offsetWidth;
+    teaserEl.classList.add('visible');
+    audioManager.playTeaserBlip();
+
+    if (state.teaserTimeout) clearTimeout(state.teaserTimeout);
+    state.teaserTimeout = setTimeout(() => {
+        teaserEl.classList.remove('visible');
+    }, 2000);
 }
 
 // ── Keyboard ──────────────────────────────────────────────────────
