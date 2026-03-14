@@ -27,7 +27,7 @@
       <div class="header-right">
         <div id="title">🗺️ מַפָּאוֹת</div>
         <button id="btn-audio" onclick="audioManager.toggleMute()" title="השתק מוזיקה" class="icon-btn">🔊</button>
-        <a href="help.html" id="btn-help" title="הוראות משחק" class="icon-btn">❓</a>
+        <button id="btn-help" onclick="showHelpModal()" title="הוראות משחק" class="icon-btn">❓</button>
       </div>
 
       <div id="score-box">
@@ -131,6 +131,78 @@
       </div>
 
       <button class="btn btn-close-modal" onclick="closeGameOverModal()">✕ סגור והמשך לשחק</button>
+    </div>
+  </div>
+
+  <!-- ── Help Modal ──────────────────────────────── -->
+  <div id="help-modal" class="modal-overlay">
+    <div class="modal-content help-modal-content">
+      <div class="help-header">
+        <div class="help-logo">🗺️ מַפָּאוֹת</div>
+        <h1 class="help-title">איך משחקים?</h1>
+      </div>
+
+      <!-- Banner for educational visual appeal -->
+      <div class="hero-banner">
+        <img src="data/kids_playing_map.png" alt="ילדים משחקים מַפָּאוֹת"
+          style="width: 100%; height: auto; display: block; object-fit: cover; border-radius: 8px;">
+      </div>
+
+      <div class="section">
+        <h2>מטרת המשחק</h2>
+        <p style="font-size: 1.15rem;">
+          ברוכים הבאים למַפָּאוֹת! המשחק החינוכי המושלם להיכרות עם מפת ישראל והיישובים בה.
+          מטרתכם היא לבנות רצף אותיות ארוך ככל האפשר על ידי הוספת אותיות שיוצרות יחד חלק משם של
+          יישוב קיים בארץ.
+        </p>
+      </div>
+
+      <div class="section">
+        <h2>חוקי המשחק</h2>
+        <ul class="rules-list">
+          <li>הקלידו אות עברית. המחשב יוסיף אות משלו מיד לאחר מכן.</li>
+          <li>בכל שלב, רצף האותיות שנוצר יהווה <strong>סדרה של שמות יישובים יהודיים בארץ</strong>.</li>
+          <li>אם תקלידו אות שלא מתאימה לאף יישוב בארץ, טעיתם! הרצף יתאפס ותתחילו מחדש.</li>
+          <li>שימו לב: לפעמים אותו רצף אותיות בדיוק יכול להוביל לשני יישובים שונים או יותר - נסו לתכנן מראש!</li>
+          <li>יישוב שהושלם ונשמר <strong>נפסל לשימוש חוזר</strong> באותו משחק! עליכם למצוא יישובים חדשים.</li>
+        </ul>
+      </div>
+
+      <div class="section points">
+        <h2>ניקוד וזמנים</h2>
+        <p style="margin-bottom: 15px; font-size: 1.1rem;">ענו כמה שיותר מהר כדי להכפיל ולשלש את הנקודות שלכם!</p>
+        <ul class="points-list">
+          <li>
+            <span class="pts">+5</span>
+            <div class="desc"><strong>בסיס:</strong> נקודות לכל אות נכונה שהוקלדה בהצלחה.</div>
+          </li>
+          <li>
+            <span class="pts" style="color: var(--gold);">+15</span>
+            <div class="desc"><strong>בונוס מטורף:</strong> מענה בתוך פחות מ-<strong>5 שניות</strong>. (סה"כ 20 נק'
+              לאות!)</div>
+          </li>
+          <li>
+            <span class="pts">+10</span>
+            <div class="desc"><strong>בונוס מהירות:</strong> מענה בתוך פחות מ-<strong>10 שניות</strong>. (סה"כ 15 נק'
+              לאות!)</div>
+          </li>
+        </ul>
+      </div>
+
+      <div class="section hints">
+        <h2>רמזים ועזרה</h2>
+        <p style="margin-bottom: 15px; font-size: 1.1rem;">נתקעתם? לקנות רמזים! הרמזים יעלו לכם בנקודות שצברתם, אך
+          יכולים להציל את שרשרת היישובים שלכם:</p>
+        <ul class="points-list">
+          <li>
+            <span class="pts penalty">300-</span>
+            <div class="desc"><strong>רמז מהיר (🎯):</strong> מציג את שם היישוב שכרגע מסומן על המפה (ומתאים לרצף הנוכחי)
+              למשך מספר שניות.</div>
+          </li>
+        </ul>
+      </div>
+
+      <button class="btn btn-close-modal" onclick="closeHelpModal()">✕ סגור וחזור למשחק</button>
     </div>
   </div>
 

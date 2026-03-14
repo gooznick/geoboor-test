@@ -377,7 +377,21 @@ function closeGameOverModal() {
     softReset(); // Reset the current string, but let them keep playing
 }
 
-// ── Reveal Hint UI ──────────────────────────────────────────────────
+function showHelpModal() {
+    const modal = document.getElementById('help-modal');
+    if (modal) {
+        modal.classList.add('visible');
+    }
+}
+
+function closeHelpModal() {
+    const modal = document.getElementById('help-modal');
+    if (modal) {
+        modal.classList.remove('visible');
+    }
+}
+
+// ── Helpers ──────────────────────────────────────────────────────────
 
 const revealListEl = document.getElementById('reveal-list');
 

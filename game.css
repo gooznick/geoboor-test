@@ -823,7 +823,134 @@ body {
   font-weight: 900;
   font-size: 4rem;
   text-shadow: 0 0 15px rgba(0, 0, 0, 0.8);
-  filter: none;
+}
+
+/* ── Help Modal Content Additions ── */
+.help-modal-content {
+  display: block;
+  text-align: right;
+  padding: 40px;
+  overflow-y: auto;
+}
+
+.help-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.help-logo {
+  font-size: 3.5rem;
+  color: var(--gold);
+  text-shadow: 0 0 20px rgba(255, 214, 10, 0.4);
+  margin-bottom: 5px;
+}
+
+.help-title {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 1px;
+}
+
+.hero-banner {
+  width: 100%;
+  max-width: 500px;
+  margin: 20px auto 30px auto;
+  border-radius: var(--radius);
+  border: 1px solid rgba(78, 205, 196, 0.3);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+  display: block;
+  position: relative;
+  overflow: hidden;
+  text-align: center;
+}
+
+.help-modal-content .section {
+  margin-bottom: 35px;
+  background: rgba(255, 255, 255, 0.02);
+  padding: 25px;
+  border-radius: var(--radius);
+  border-right: 4px solid var(--accent);
+  line-height: 1.6;
+}
+
+.help-modal-content .section h2 {
+  color: var(--accent);
+  font-size: 1.6rem;
+  margin-bottom: 15px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.help-modal-content .section h2::before {
+  content: '📌';
+  font-size: 1.2rem;
+}
+
+.help-modal-content .section.points h2::before {
+  content: '⭐';
+}
+
+.help-modal-content .section.hints h2::before {
+  content: '💡';
+}
+
+.points-list,
+.rules-list {
+  list-style: none;
+  padding-right: 0;
+}
+
+.rules-list li {
+  margin-bottom: 15px;
+  padding-right: 30px;
+  position: relative;
+  font-size: 1.1rem;
+}
+
+.rules-list li::before {
+  content: '✔️';
+  position: absolute;
+  right: 0;
+  top: 2px;
+  color: #4ecdc4;
+  font-size: 0.9rem;
+}
+
+.points-list li {
+  margin-bottom: 12px;
+  background: rgba(255, 255, 255, 0.06);
+  padding: 15px 20px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: transform 0.2s;
+}
+
+.points-list li:hover {
+  transform: translateX(-5px);
+  background: rgba(255, 255, 255, 0.09);
+}
+
+.points-list .pts {
+  font-weight: 800;
+  color: #4ecdc4;
+  font-size: 1.4rem;
+  min-width: 80px;
+  text-align: center;
+  text-shadow: 0 0 10px rgba(78, 205, 196, 0.4);
+}
+
+.points-list .penalty {
+  color: var(--accent);
+  text-shadow: 0 0 10px rgba(230, 57, 70, 0.4);
+}
+
+.desc strong {
+  color: var(--gold);
 }
 
 /* ── Inactivity Teaser ── */
