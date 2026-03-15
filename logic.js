@@ -103,7 +103,7 @@ function getVariants(entry) {
  * //     "תלאביב" → ["תל אביב", "תל אביב"]
  * //     "יפו"     → ["תל אביב", "יפו"]
  */
-function readGameData(raw, exceptions = null) {
+function readGameData(raw) {
 
 
     const db = new Map();
@@ -113,6 +113,10 @@ function readGameData(raw, exceptions = null) {
     for (const [canonKey, entry] of Object.entries(raw)) {
         const aliases = (entry.aliases || []).filter(Boolean);
         const outposts = (entry.outposts || []).filter(Boolean);
+        if (!entry.x || !entry.y) {
+            console.log(`Skipping ${canonKey} - no coordinates`);
+            continue;
+        }
 
         db.set(canonKey, {
             name: entry.name,
@@ -125,42 +129,7 @@ function readGameData(raw, exceptions = null) {
         });
     }
 
-    // pass 2 — read another json and update missing
-    if (exceptions) {
-        for (const [key, exc] of Object.entries(exceptions)) {
-            if (!key || key.startsWith('_')) continue;
-
-            if (db.has(key)) {
-                const e = db.get(key);
-
-                if (!e.name && exc.name) e.name = exc.name;
-                if (!e.population && exc.population) e.population = exc.population;
-                if (!e.establishment && exc.establishment) e.establishment = exc.establishment;
-
-                if ((!e.aliases || e.aliases.length === 0) && exc.aliases)
-                    e.aliases = exc.aliases.filter(Boolean);
-
-                if ((!e.outposts || e.outposts.length === 0) && exc.outposts)
-                    e.outposts = exc.outposts.filter(Boolean);
-
-                if ((!e.x || !e.y) && exc.x && exc.y) {
-                    e.x = exc.x;
-                    e.y = exc.y;
-                }
-            } else {
-                db.set(key, {
-                    name: exc.name || "",
-                    population: exc.population || "",
-                    establishment: exc.establishment || "",
-                    aliases: (exc.aliases || []).filter(Boolean),
-                    outposts: (exc.outposts || []).filter(Boolean),
-                    x: exc.x || 0,
-                    y: exc.y || 0,
-                });
-            }
-        }
-    }
-    // pass 3 — build canonicalToName
+    // pass 2 — build canonicalToName
     for (const [canonKey, entry] of db.entries()) {
 
         if (entry.name) {

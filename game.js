@@ -36,6 +36,7 @@ let state = {
     compOptions: [],
     allOptions: [],
     gameOverTimeout: null,
+    isProcessing: false
 };
 
 let bestScore = parseInt(localStorage.getItem('geoboor_best_score')) || 0;
@@ -375,6 +376,7 @@ function closeGameOverModal() {
     }
 
     softReset(); // Reset the current string, but let them keep playing
+    state.isProcessing = false;
 }
 
 function showHelpModal() {
@@ -501,8 +503,13 @@ function randChoice(arr) {
 }
 
 function handleLetter(ch) {
+    if (state.isProcessing) return;
+    state.isProcessing = true;
     ch = removeSofit(ch);
-    if (!isHebrewLetter(ch)) return;
+    if (!isHebrewLetter(ch)) {
+        state.isProcessing = false;
+        return;
+    }
     console.log("handleLetter", ch, state.current);
 
     audioManager.playUserSelect();
@@ -549,6 +556,7 @@ function handleLetter(ch) {
         if (state.gameOverTimeout) clearTimeout(state.gameOverTimeout);
         state.gameOverTimeout = setTimeout(() => {
             showGameOverModal(foundNames, displayName, true);
+
         }, 4000);
         return;
     }
@@ -570,6 +578,7 @@ function handleLetter(ch) {
         const [displayName, originalVariant, metadata] = canonicalToName.get(state.compNext.lastCanonical);
         const foundNames = state.allOptions.length > 0 ? state.allOptions[0].forbidden : [];
         showGameOverModal(foundNames, displayName);
+
         return;
     }
     choice = randChoice(compOptions1);
@@ -636,6 +645,7 @@ function handleLetter(ch) {
             triggerEasterEgg(easterEggData[settlement].msg, easterEggData[settlement].points);
         }
     }
+    state.isProcessing = false;
 
 }
 
@@ -728,7 +738,7 @@ function showInactivityTeaser() {
                 `נשארו ${uniqueLetters} אפשרויות לאות הבאה... קלי קלות. 💪`,
                 `זה נהיה צפוף... נותרו ${uniqueLetters} אופציות. 🥵`,
                 `יש רק ${uniqueLetters} אותיות שממשיכות את הרצף. קדימה! 🔥`,
-                `כל צעד סוגר אפשרויות. ${uniqueLetters} אותיות לפניכם. �`
+                `כל צעד סוגר אפשרויות. ${uniqueLetters} אותיות לפניכם. 🧐`
             ];
         } else {
             phrases = [
@@ -879,13 +889,11 @@ async function init() {
     const [gameResp, eggsResp, excResp] = await Promise.all([
         fetch('data/game_data.json'),
         fetch('data/easter_eggs.json').catch(() => null), // Ignore missing file just in case
-        fetch('data/exceptions.json').catch(() => null)
     ]);
     const raw = await gameResp.json();
     const eggsRaw = eggsResp ? await eggsResp.json() : {};
-    const exceptionsRaw = excResp ? await excResp.json() : null;
 
-    const gameData = readGameData(raw, exceptionsRaw);
+    const gameData = readGameData(raw);
     db = gameData.db;
     canonicalToName = gameData.canonicalToName;
 

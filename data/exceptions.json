@@ -1,5 +1,4 @@
 {
-    "_comment": "Explicit name overrides. 'name' = display name shown on map. 'aliases' = alternative game words (plain Hebrew, no reversal needed here).",
     "תל חי (מכללה)": {
         "name": "תל חי",
         "population": "100",
@@ -164,7 +163,7 @@
             "פוריה"
         ]
     },
-    "עצמון משגב": {
+    "עצמון שגב": {
         "name": "עצמון",
         "aliases": [
             "משגב"
@@ -328,14 +327,6 @@
             "שכונת הרחיבי"
         ]
     },
-    "הר ברכה": {
-        "name": "הר ברכה",
-        "aliases": [],
-        "outposts": [
-            "גבעת סנה יעקב",
-            "מגיני ארץ"
-        ]
-    },
     "יצהר": {
         "name": "יצהר",
         "aliases": [],
@@ -400,28 +391,12 @@
             "מצפה צבאים"
         ]
     },
-    "מלאכי השלום": {
-        "name": "מלאכי השלום",
-        "aliases": [],
-        "outposts": [
-            "גל יוסף",
-            "מצודת דוד"
-        ]
-    },
     "גבעת אסף": {
         "name": "גבעת אסף",
         "aliases": [],
         "outposts": [
             "עוז ציון",
             "צור הראל"
-        ]
-    },
-    "ואדי חרמיה": {
-        "name": "ואדי חרמיה",
-        "aliases": [],
-        "outposts": [
-            "כפר טרפון",
-            "החווה של מגורי"
         ]
     },
     "דולב": {
