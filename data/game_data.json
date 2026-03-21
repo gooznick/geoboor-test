@@ -4331,8 +4331,16 @@
         "aliases": [],
         "outposts": [
             "מצפה חגית",
-            "גבעה 468"
         ],
+        "x": 150,
+        "y": 265
+    },
+    "אלון": {
+        "name": "אלון",
+        "population": "1000",
+        "establishment": "2026",
+        "aliases": [],
+        "outposts": [],
         "x": 150,
         "y": 265
     },
@@ -4466,7 +4474,9 @@
         "name": "כפר המכבי",
         "population": "452",
         "establishment": "1936",
-        "aliases": [],
+        "aliases": [
+            "כפר מכבי"
+        ],
         "outposts": [],
         "x": 123,
         "y": 125
@@ -4479,15 +4489,6 @@
         "outposts": [],
         "x": 76,
         "y": 256
-    },
-    "כפר הנוער הדתי": {
-        "name": "כפר הנוער הדתי",
-        "population": "106",
-        "establishment": "1937",
-        "aliases": [],
-        "outposts": [],
-        "x": 121,
-        "y": 132
     },
     "כפר הנשיא": {
         "name": "כפר הנשיא",
