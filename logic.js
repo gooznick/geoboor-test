@@ -220,19 +220,18 @@ function checkSequence(string, canonicalToName, forbidden, sequence, results) {
         }
     }
 
-    if (!consumed) {
-        // Report every canonical key that has `string` as a prefix
-        for (const [canonicalKey, [displayName, originalVariant]] of canonicalToName) {
-            if (canonicalKey.startsWith(string) && !forbidden.includes(displayName)) {
-                results.push({
-                    sequence: [...sequence],
-                    forbidden: [...forbidden],
-                    lastCanonical: canonicalKey,
-                    letter: canonicalKey[string.length],
-                    lettersUntilEnd: canonicalKey.length - string.length,
-                    isBeginOfSettlement: string.length === 0
-                });
-            }
+    // Report every canonical key that has `string` as a strict prefix, even if
+    // another canonical key was fully consumed above.
+    for (const [canonicalKey, [displayName, originalVariant]] of canonicalToName) {
+        if (canonicalKey.startsWith(string) && canonicalKey !== string && !forbidden.includes(displayName)) {
+            results.push({
+                sequence: [...sequence],
+                forbidden: [...forbidden],
+                lastCanonical: canonicalKey,
+                letter: canonicalKey[string.length],
+                lettersUntilEnd: canonicalKey.length - string.length,
+                isBeginOfSettlement: string.length === 0
+            });
         }
     }
 }

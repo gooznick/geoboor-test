@@ -519,4 +519,23 @@ describe('getComputerOptions and getUserOptions', () => {
             expect(allOptions.length).toBeGreaterThan(0);
         }
     });
+
+    test('Sequence "חצורהגלילית" is always valid for computer and user after each letter', () => {
+        const { removeSofit } = require('./logic.js');
+        const raw = require('./data/game_data.json');
+        const { canonicalToName } = readGameData(raw);
+
+        const rawSeq = 'חצורהגלילית';
+        let currentString = '';
+
+        for (let i = 0; i < rawSeq.length; i++) {
+            currentString += removeSofit(rawSeq[i]);
+            const compOpts = getComputerOptions(currentString, canonicalToName);
+            const { allOptions } = getUserOptions(currentString, canonicalToName);
+
+            // Expect that both computer and user have valid options
+            expect(compOpts.length).toBeGreaterThan(0);
+            expect(allOptions.length).toBeGreaterThan(0);
+        }
+    });
 });

@@ -4175,7 +4175,9 @@
         "name": "כוכב יאיר",
         "population": "9007",
         "establishment": "1981",
-        "aliases": [],
+        "aliases": [
+            "צור יגאל"
+        ],
         "outposts": [],
         "x": 107,
         "y": 208
